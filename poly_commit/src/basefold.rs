@@ -33,7 +33,7 @@ impl CommitmentSerde for MerkleRoot {
 }
 
 #[derive(Debug, Clone)]
-pub struct DeepFoldParam<F: FftField> {
+pub struct BaseFoldParam<F: FftField> {
     pub mult_subgroups: Vec<Radix2Group<F::FftBaseField>>,
     pub variable_num: usize,
     pub query_num: usize,
@@ -122,15 +122,15 @@ impl<F: FftField> InterpolateValue<F> {
 }
 
 #[derive(Clone)]
-pub struct DeepFoldProver<F: FftField> {
+pub struct BasefoldProver<F: FftField> {
     pub interpolation: InterpolateValue<F::FftBaseField>,
     poly: Vec<Vec<F::BaseField>>,
 }
 
-impl<F: FftField> DeepFoldProver<F> {
+impl<F: FftField> BasefoldProver<F> {
     fn evaluate_next_domain(
         last_interpolation: &Vec<F>,
-        pp: &DeepFoldParam<F>,
+        pp: &BaseFoldParam<F>,
         round: usize,
         challenge: F,
     ) -> Vec<F> {
@@ -148,8 +148,8 @@ impl<F: FftField> DeepFoldProver<F> {
     }
 }
 
-impl<F: FftField> PolyCommitProver<F> for DeepFoldProver<F> {
-    type Param = DeepFoldParam<F>;
+impl<F: FftField> PolyCommitProver<F> for BasefoldProver<F> {
+    type Param = BaseFoldParam<F>;
     type Commitment = MerkleRoot;
 
     fn new(pp: &Self::Param, poly: &[Vec<F::BaseField>]) -> Self {
@@ -157,7 +157,7 @@ impl<F: FftField> PolyCommitProver<F> for DeepFoldProver<F> {
             .iter()
             .flat_map(|x| pp.mult_subgroups[0].fft(x.clone()))
             .collect::<Vec<_>>();
-        DeepFoldProver {
+        BasefoldProver {
             interpolation: InterpolateValue::new(values, 2 * poly.len()),
             poly: poly.iter().map(|x| x.clone()).collect(),
         }
@@ -254,18 +254,18 @@ impl<F: FftField> PolyCommitProver<F> for DeepFoldProver<F> {
 }
 
 #[derive(Clone)]
-pub struct DeepFoldVerifier<F: FftField> {
+pub struct BaseFoldVerifier<F: FftField> {
     commit: MerkleTreeVerifier,
     poly_num: usize,
     _data: PhantomData<F>,
 }
 
-impl<F: FftField> PolyCommitVerifier<F> for DeepFoldVerifier<F> {
-    type Param = DeepFoldParam<F>;
+impl<F: FftField> PolyCommitVerifier<F> for BaseFoldVerifier<F> {
+    type Param = BaseFoldParam<F>;
     type Commitment = MerkleRoot;
 
     fn new(pp: &Self::Param, commit: Self::Commitment, poly_num: usize) -> Self {
-        DeepFoldVerifier {
+        BaseFoldVerifier {
             commit: MerkleTreeVerifier::new(pp.mult_subgroups[0].size() / 2, commit.0),
             poly_num,
             _data: PhantomData::default(),

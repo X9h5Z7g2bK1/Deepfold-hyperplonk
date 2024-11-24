@@ -17,5 +17,10 @@ name = "deepfold"
 harness = false
 
 [[bench]]
+name = "basefold"
+harness = false
+
+
+[[bench]]
 name = "piop"
 harness = false

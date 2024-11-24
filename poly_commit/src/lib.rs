@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use arithmetic::field::Field;
 use util::fiat_shamir::{Proof, Transcript};
 
+pub mod basefold;
 pub mod deepfold;
 pub mod nil;
 pub mod shuffle;
